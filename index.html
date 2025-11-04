@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>🦀 Flower Minimal</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: auto; /* 允许水平滚动 */
+        }
+        .container {
+            background: white;
+            max-width: 100%; /*600px;*/
+            min-width: 200px; /* 设置最小宽度确保内容显示 */
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        #output {
+             background: #000000; /*f8f9fa  !important*/
+           // background-color: #000000 !important; /* 纯黑 */
+            color: #ff69b4;
+            /* font-size: 8px; 手机端更小字体 */
+            overflow-x: auto; /* overflow: auto 关键：允许水平滚动 */
+            overflow-y: auto; /* 同时支持水平和垂直滚动 */
+            -webkit-overflow-scrolling: touch; /*  iOS平滑滚动 */
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 100px;
+            overflow: auto;
+            min-width: 200px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .loading { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦀 Flower Demo</h1>
+        <p>自动化构建演示</p>
+
+        <div class="status loading" id="status">⏳ 加载 FLOWER 模块...</div>
+
+        <div class="buttons">
+            <button onclick="callGreet()">👋 打招呼</button>
+            <button onclick="callAdd()">🧮 计算加法</button>
+            <button onclick="showRose()">🌹 显示玫瑰</button>
+            <button onclick="testCallback()">🌹 回调玫瑰 </button>
+            <button onclick="clearOutput()">🗑️ 清空/换色</button>
+            <button onclick="callMultiAdd()">🔢 循环缩放 </button>
+        </div>
+
+        <div id="output">点击按钮测试 FLOWER 功能</div>
+    </div>
+
+    <script type="module">
+        // 正确导入所有函数
+        import init, { greet, add, add_three, get_rose, print_rose_line_by_line } from './docs/flowers.js';
+
+        let flowerReady = false;
+        let flowerFunctions = {};
+
+        // 颜色序列（按顺序轮询）
+        const colorSequence = [
+            { code: '#ff69b4', name: '热粉色' },
+            { code: '#ff1493', name: '深粉色' },
+            { code: '#c71585', name: '紫红色' },
+            { code: '#db7093', name: '浅紫红' },
+            { code: '#ffc0cb', name: '粉色' },
+            { code: '#ffb6c1', name: '浅粉色' },
+            { code: '#00ff88', name: '青绿色' },
+            { code: '#ffff00', name: '黄色' },
+            { code: '#ff4444', name: '红色' },
+            { code: '#FFFF00', name: '橙色' },
+            { code: '#00ffff', name: '青色' }
+        ];
+        // 字体大小（按顺序轮询）
+        const fontSequence = [
+            { code: '1px', name: '1' },
+            { code: '2px', name: '2' },
+            { code: '3px', name: '3' },
+            { code: '4px', name: '4' },
+            { code: '8px', name: '5' },
+            { code: '10px', name: '6' },
+            { code: '12px', name: '7' },
+            { code: '14px', name: '8' },
+            { code: '17px', name: '9' },
+            { code: '20px', name: '10' }
+        ];
+
+        let currentColorIndex = 0;
+        let currentFontIndex = 0;
+
+        async function initializeFlower() {
+            try {
+                const status = document.getElementById('status');
+                status.textContent = "⏳ 正在初始化 FLOWER...";
+
+                // 初始化 FLOWER
+                await init();
+
+                // 保存函数引用
+                flowerFunctions = {
+                    greet: greet,
+                    add: add,
+                    add_three: add_three,
+                    get_rose: get_rose,
+                    print_rose_line_by_line: print_rose_line_by_line
+                };
+
+                flowerReady = true;
+
+                status.className = "status success";
+                status.textContent = "✅ FLOWER 模块加载成功！";
+
+                // 自动测试
+                setTimeout(() => {
+                    document.getElementById('output').textContent =
+                        flowerFunctions.greet('自动测试') + '\n' +
+                        '计算测试: 10 + 20 = ' + flowerFunctions.add(10, 20) + '\n' +
+                        '三数相加: 1 + 2 + 3 = ' + flowerFunctions.add_three(1, 2, 3);
+                }, 500);
+
+            } catch (error) {
+                document.getElementById('status').className = "status error";
+                document.getElementById('status').textContent = "❌ 加载失败: " + error.message;
+                console.error('FLOWER 加载错误:', error);
+            }
+        }
+
+        // 全局函数定义
+        window.callGreet = function() {
+            if (!flowerReady) {
+                alert('FLOWER 模块尚未加载完成，请稍后重试');
+                return;
+            }
+            const name = prompt('请输入你的名字:', 'rose 爱好者');
+            if (name) {
+                const result = flowerFunctions.greet(name);
+                document.getElementById('output').textContent = result;
+            }
+        };
+
+        window.callAdd = function() {
+            if (!flowerReady) {
+                alert('FLOWER 模块尚未加载完成，请稍后重试');
+                return;
+            }
+            const a = parseInt(prompt('第一个数字:', '15')) || 15;
+            const b = parseInt(prompt('第二个数字:', '25')) || 25;
+            const result = flowerFunctions.add(a, b);
+            document.getElementById('output').textContent =
+                `🧮 计算结果: ${a} + ${b} = ${result}`;
+        };
+
+        window.callMultiAdd = function() {
+            /*
+             if (!flowerReady) {
+                 alert('FLOWER 模块尚未加载完成，请稍后重试');
+                 return;
+             }
+             const result = flowerFunctions.add_three(5, 10, 15);
+             document.getElementById('output').textContent =
+                 `🔢 三数相加: 5 + 10 + 15 = ${result}`;
+
+            */
+            currentFontIndex = (currentFontIndex + 1) % fontSequence.length;
+            const fontColor = fontSequence[currentFontIndex];
+            const output = document.getElementById('output');
+
+            // 设置文字
+            output.style.fontSize = fontColor.code;
+
+        };
+
+        window.showRose = function() {
+            if (!flowerReady) {
+                alert('FLOWER 模块尚未加载完成，请稍后重试');
+                return;
+            }
+            const rose = flowerFunctions.get_rose();
+            document.getElementById('output').textContent = rose;
+        };
+
+        // 应用当前颜色
+        function changeColor() {
+            currentColorIndex = (currentColorIndex + 1) % colorSequence.length;
+            const currentColor = colorSequence[currentColorIndex];
+            const output = document.getElementById('output');
+
+            // 设置文字颜色
+            output.style.color = currentColor.code;
+
+            // 更新显示
+            /*document.getElementById('currentColor').textContent =
+                `${currentColor.name} (${currentColor.code})`;
+            document.getElementById('currentColor').style.color = currentColor.code;
+            */
+        }
+
+        window.clearOutput = function() {
+            changeColor();
+            // document.getElementById('output').textContent = '输出已清空';
+        };
+
+        function testLineByLine() {
+            if (!flowerReady) {
+                alert("请先初始化FLOWER");
+                return;
+            }
+
+            const output = document.getElementById('output');
+            output.textContent = "🚀 开始输出...\n"; // 逐行
+
+            // 设置回调函数
+            const callback = function(line) {
+                output.textContent += line;
+                // + "\n";
+                output.scrollTop = output.scrollHeight;
+                output.scrollLeft = output.scrollWidth;
+            };
+
+            flowerFunctions.print_rose_line_by_line(callback);
+        }
+        window.testCallback = testLineByLine;
+
+        // 页面加载时立即初始化
+        window.addEventListener('DOMContentLoaded', initializeFlower);
+    </script>
+</body>
+</html>
